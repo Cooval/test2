@@ -6,7 +6,8 @@
     <style>
         body{font-family:sans-serif; max-width:580px; margin:40px auto;}
         label{display:block;margin:8px 0 2px}
-        input[type=number]{width:120px}
+        input[type=number], select{width:120px}
+        input[readonly]{background:#eee}
         .row{display:flex;gap:16px;flex-wrap:wrap}
         button{margin-top:16px;padding:8px 18px;font-size:1rem}
     </style>
@@ -17,26 +18,30 @@
 <form method="post">
     <div class="row">
         <div>
-            <label>L&nbsp;[mm]</label>
+            <label>Wysokość pudełka&nbsp;[mm]</label>
             <input type="number" step="0.1" name="L"   value="100" required />
         </div>
         <div>
-            <label>B&nbsp;[mm]</label>
+            <label>Szerokość pudełka&nbsp;[mm]</label>
             <input type="number" step="0.1" name="B"   value="100" required />
         </div>
         <div>
-            <label>H&nbsp;[mm]</label>
+            <label>Głębokość pudełka&nbsp;[mm]</label>
             <input type="number" step="0.1" name="H"   value="50"  required />
         </div>
     </div>
     <div class="row">
         <div>
-            <label>R&nbsp;[mm]</label>
-            <input type="number" step="0.1" name="R"   value="20"  required />
+            <label>Zawinięcie&nbsp;[mm]</label>
+            <input type="number" step="0.1" name="R"   value="15" readonly />
         </div>
         <div>
-            <label>ep (th1)&nbsp;[mm]</label>
-            <input type="number" step="0.01" name="ep1" value="2"   required />
+            <label>Grubość tektury&nbsp;[mm]</label>
+            <select name="ep1" required>
+                <option value="1">1</option>
+                <option value="1.5">1,5</option>
+                <option value="2" selected>2</option>
+            </select>
         </div>
     </div>
     <button type="submit">POBIERZ PDF</button>
