@@ -4,39 +4,54 @@
     <meta charset="utf-8" />
     <title>Generator siatki pudełka</title>
     <style>
-        body{font-family:sans-serif; max-width:580px; margin:40px auto;}
-        label{display:block;margin:8px 0 2px}
+        body{font-family:sans-serif; max-width:580px; margin:40px auto; text-align:center;}
+        label{display:block;margin:8px 0 2px;text-align:left}
         input[type=number], select{width:120px}
         input[readonly]{background:#eee}
-        .row{display:flex;gap:16px;flex-wrap:wrap}
+        .row{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
         button{margin-top:16px;padding:8px 18px;font-size:1rem}
+        .lang-switch{margin-bottom:20px;}
+        .lang-switch button{margin:0 4px;padding:4px 10px;font-size:0.9rem}
+        .box-diagram{position:relative;display:inline-block;margin:20px 0;}
+        .box-diagram img.logo-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40%;max-width:120px;pointer-events:none;}
+        .logo{width:150px;margin-bottom:20px;}
     </style>
 </head>
 <body>
-<h2>Projekt pudełka (spód/wieko + oklejka)</h2>
+<img class="logo" src="https://www.mbprint.pl/wp-content/uploads/2020/07/MB-print-logo11.png" alt="MB print logo"/>
+<div class="lang-switch">
+    <button type="button" data-lang="pl">PL</button>
+    <button type="button" data-lang="en">EN</button>
+</div>
+<h2 id="title">Projekt pudełka (spód/wieko + oklejka)</h2>
+
+<div class="box-diagram">
+    <img src="https://pandagm.com/wp-content/uploads/2022/06/twoPieceBoxDimensions.gif" alt="Box dimensions"/>
+    <img class="logo-overlay" src="https://www.mbprint.pl/wp-content/uploads/2020/07/MB-print-logo11.png" alt="MB print logo"/>
+</div>
 
 <form method="post">
     <div class="row">
         <div>
-            <label>Wysokość pudełka&nbsp;[mm]</label>
+            <label id="label-height">Wysokość pudełka&nbsp;[mm]</label>
             <input type="number" step="0.1" name="L"   value="100" required />
         </div>
         <div>
-            <label>Szerokość pudełka&nbsp;[mm]</label>
+            <label id="label-width">Szerokość pudełka&nbsp;[mm]</label>
             <input type="number" step="0.1" name="B"   value="100" required />
         </div>
         <div>
-            <label>Głębokość pudełka&nbsp;[mm]</label>
+            <label id="label-depth">Głębokość pudełka&nbsp;[mm]</label>
             <input type="number" step="0.1" name="H"   value="50"  required />
         </div>
     </div>
     <div class="row">
         <div>
-            <label>Zawinięcie&nbsp;[mm]</label>
+            <label id="label-flap">Zawinięcie&nbsp;[mm]</label>
             <input type="number" step="0.1" name="R"   value="15" readonly />
         </div>
         <div>
-            <label>Grubość tektury&nbsp;[mm]</label>
+            <label id="label-thick">Grubość tektury&nbsp;[mm]</label>
             <select name="ep1" required>
                 <option value="1">1</option>
                 <option value="1.5">1,5</option>
@@ -44,13 +59,64 @@
             </select>
         </div>
     </div>
-    <button type="submit">POBIERZ PDF</button>
+    <button id="download" type="submit">POBIERZ PDF</button>
 </form>
 
 <p style="margin-top:32px;font-size:0.9em;color:#444">
-    • CUT = czerwona linia ciągła<br/>
-    • FOLD = niebieska linia przerywana<br/>
-    • Skala 1 : 1 (mm) – plik gotowy do sztancy / plotera.
+    <span id="note1">• CUT = czerwona linia ciągła</span><br/>
+    <span id="note2">• FOLD = niebieska linia przerywana</span><br/>
+    <span id="note3">• Skala 1 : 1 (mm) – plik gotowy do sztancy / plotera.</span>
 </p>
+
+<script>
+const translations = {
+    pl: {
+        title: 'Projekt pudełka (spód/wieko + oklejka)',
+        height: 'Wysokość pudełka [mm]',
+        width: 'Szerokość pudełka [mm]',
+        depth: 'Głębokość pudełka [mm]',
+        flap: 'Zawinięcie [mm]',
+        thick: 'Grubość tektury [mm]',
+        button: 'POBIERZ PDF',
+        note1: '• CUT = czerwona linia ciągła',
+        note2: '• FOLD = niebieska linia przerywana',
+        note3: '• Skala 1 : 1 (mm) – plik gotowy do sztancy / plotera.'
+    },
+    en: {
+        title: 'Box design (bottom/top + wrapper)',
+        height: 'Box height [mm]',
+        width: 'Box width [mm]',
+        depth: 'Box depth [mm]',
+        flap: 'Flap [mm]',
+        thick: 'Cardboard thickness [mm]',
+        button: 'DOWNLOAD PDF',
+        note1: '• CUT = red solid line',
+        note2: '• FOLD = blue dashed line',
+        note3: '• Scale 1 : 1 (mm) – ready for die-cut / plotter.'
+    }
+};
+
+function setLang(lang) {
+    const t = translations[lang];
+    document.documentElement.lang = lang;
+    document.getElementById('title').textContent = t.title;
+    document.getElementById('label-height').textContent = t.height;
+    document.getElementById('label-width').textContent = t.width;
+    document.getElementById('label-depth').textContent = t.depth;
+    document.getElementById('label-flap').textContent = t.flap;
+    document.getElementById('label-thick').textContent = t.thick;
+    document.getElementById('download').textContent = t.button;
+    document.getElementById('note1').textContent = t.note1;
+    document.getElementById('note2').textContent = t.note2;
+    document.getElementById('note3').textContent = t.note3;
+}
+
+document.querySelectorAll('.lang-switch button').forEach(btn => {
+    btn.addEventListener('click', () => setLang(btn.dataset.lang));
+});
+
+// initialize to page language
+setLang(document.documentElement.lang || 'pl');
+</script>
 </body>
 </html>
