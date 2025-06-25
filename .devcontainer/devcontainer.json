@@ -1,7 +1,7 @@
 {
   "name": "Box-Generator",
   "build": {
-    "dockerfile": "Dockerfile"
+    "dockerfile": "Dockerfile",
     "context": ".."        
   },
   "postCreateCommand": "echo '✓ środowisko gotowe'",
