@@ -2,6 +2,7 @@
   "name": "Box-Generator",
   "build": {
     "dockerfile": "Dockerfile"
+    "context": ".."        
   },
   "postCreateCommand": "echo '✓ środowisko gotowe'",
   "forwardPorts": [5000],
