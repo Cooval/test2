@@ -1,0 +1,16 @@
+{
+  "name": "Box-Generator",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "postCreateCommand": "echo '✓ środowisko gotowe'",
+  "forwardPorts": [5000],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ]
+    }
+  }
+}
