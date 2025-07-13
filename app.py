@@ -3,7 +3,7 @@ from io import BytesIO
 from generator import svg_bytes_from_params
 import cairosvg
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="templates")
 
 @app.route("/", methods=["GET", "POST"])
 def index():
