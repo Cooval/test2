@@ -3,12 +3,20 @@ generator.py – rysuje siatkę pudełka (spód + oklejka) dokładnie wg logiki
 oryginalnego skryptu PackLib, ale bez żadnych bibliotek CAD.
 """
 import svgwrite
+import base64
 from math import isclose
+from pathlib import Path
 
 # Stałe graficzne
 CUT_STROKE   = {'stroke': '#ff0000', 'stroke_width': '0.25mm', 'fill': 'none'}
-FOLD_STROKE  = {'stroke': '#0000ff', 'stroke_width': '0.25mm',
-                'fill': 'none', 'stroke_dasharray': '2,2'}
+FOLD_STROKE  = {
+    'stroke': '#0000ff',
+    'stroke_width': '0.25mm',
+    'fill': 'none',
+    'stroke_dasharray': '2,2'
+}
+
+LOGO_ASPECT = 716 / 1000  # height/width ratio of MB-print-logo11.png
 
 def _derived_vars(L, B, H, R, ep):
     """przekładka BuildParameterStack + blok 'formulas' z Twojego skryptu"""
@@ -58,22 +66,96 @@ def _segment_list(v):
             out.append((kind, x0, y0, x1, y1))
     return out
 
-def svg_bytes_from_params(L, B, H, R, ep):
+
+def external_dims(L: float, B: float, H: float, ep: float):
+    """Compute external box dimensions used in the info label."""
+    if ep == 1:
+        add_x, add_y = 6.5, 5.5
+    elif ep == 1.5:
+        add_x, add_y = 8.5, 7.5
+    elif ep == 2:
+        add_x, add_y = 10.5, 9.5
+    else:
+        add_x = add_y = 0
+    return (
+        round(L + add_x, 1),
+        round(B + add_y, 1),
+        round(H + ep, 1),
+    )
+
+def svg_bytes_from_params(
+    L: float,
+    B: float,
+    H: float,
+    R: float,
+    ep: float,
+    *,
+    logo_path: str | None = None,
+    ext_dims: tuple | None = None,
+):
+    """Return SVG drawing bytes of the box layout with margins and labels."""
     v = _derived_vars(L, B, H, R, ep)
     segs = _segment_list(v)
 
-    # Ustalamy rozmiar roboczy   –   ► margines 20 mm, reszta auto-bbox
-    max_x = max(max(x0, x1) for _, x0, _, x1, _ in segs) + 20
-    max_y = max(max(y0, y1) for _, _, y0, _, y1 in segs) + 20
+    # Determine bounding box of generated segments
+    min_x = min(min(x0, x1) for _, x0, _, x1, _ in segs)
+    min_y = min(min(y0, y1) for _, _, y0, _, y1 in segs)
+    max_x = max(max(x0, x1) for _, x0, _, x1, _ in segs)
+    max_y = max(max(y0, y1) for _, _, y0, _, y1 in segs)
 
-    dwg = svgwrite.Drawing(size=(f"{max_x}mm", f"{max_y}mm"), profile='tiny')
+    width = max_x - min_x
+    height = max_y - min_y
+    margin = 20
 
-    cut_layer  = dwg.add(dwg.g(id="CUT",  **CUT_STROKE))
-    fold_layer = dwg.add(dwg.g(id="FOLD", **FOLD_STROKE))
+    dwg_w = width + 2 * margin
+    dwg_h = height + 2 * margin
+
+    dwg = svgwrite.Drawing(size=(f"{dwg_w}mm", f"{dwg_h}mm"), profile="tiny")
+
+    # Informational text on top margin
+    if ext_dims is not None:
+        ext_label = f"{L:g}×{B:g}×{H:g} mm  |  {ext_dims[0]:g}×{ext_dims[1]:g}×{ext_dims[2]:g} mm  |  created by MB print"
+        dwg.add(
+            dwg.text(
+                ext_label,
+                insert=(f"{dwg_w / 2}mm", f"{margin / 2}mm"),
+                text_anchor="middle",
+                font_size="6mm",
+                font_family="sans-serif",
+            )
+        )
+
+    # group with translation to keep margin and center
+    content = dwg.g(transform=f"translate({margin - min_x}mm,{margin - min_y}mm)")
+    cut_layer = content.add(dwg.g(id="CUT", **CUT_STROKE))
+    fold_layer = content.add(dwg.g(id="FOLD", **FOLD_STROKE))
 
     for kind, x0, y0, x1, y1 in segs:
         layer = cut_layer if kind == "CUT" else fold_layer
-        layer.add(dwg.line(start=(f"{x0}mm", f"{y0}mm"),
-                           end  =(f"{x1}mm", f"{y1}mm")))
+        layer.add(
+            dwg.line(
+                start=(f"{x0}mm", f"{y0}mm"),
+                end=(f"{x1}mm", f"{y1}mm"),
+            )
+        )
+
+    dwg.add(content)
+
+    # Center logo if provided
+    if logo_path:
+        logo_file = Path(logo_path)
+        if logo_file.exists():
+            b64 = base64.b64encode(logo_file.read_bytes()).decode()
+            logo_w = min(40, width * 0.3)
+            logo_h = logo_w * LOGO_ASPECT
+            logo_x = (dwg_w - logo_w) / 2
+            logo_y = (dwg_h - logo_h) / 2
+            dwg.add(
+                dwg.image(
+                    href=f"data:image/png;base64,{b64}",
+                    insert=(f"{logo_x}mm", f"{logo_y}mm"),
+                    size=(f"{logo_w}mm", f"{logo_h}mm"),
+                )
+            )
 
     return dwg.tostring().encode("utf-8")
