@@ -13,7 +13,6 @@
         .lang-switch{margin-bottom:20px;}
         .lang-switch button{margin:0 4px;padding:4px 10px;font-size:0.9rem}
         .box-diagram{position:relative;display:inline-block;margin:20px 0;}
-        .box-diagram img.logo-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40%;max-width:120px;pointer-events:none;}
         .logo{width:150px;margin-bottom:20px;}
     </style>
 </head>
@@ -27,7 +26,6 @@
 
 <div class="box-diagram">
     <img id="box-image" src="{{ url_for('static', filename='pud_pl.jpg') }}" alt="Box dimensions"/>
-//    <img class="logo-overlay" src="https://www.mbprint.pl/wp-content/uploads/2020/07/MB-print-logo11.png" alt="MB print logo"/>
 </div>
 
 <form method="post">
@@ -59,8 +57,13 @@
             </select>
         </div>
     </div>
+
     <button id="download" type="submit">POBIERZ PDF</button>
 </form>
+
+<p id="internal-info" style="margin-top:20px;font-weight:bold"></p>
+<p id="external-label" style="font-weight:bold"></p>
+<p id="external" style="margin-bottom:20px"></p>
 
 <p style="margin-top:32px;font-size:0.9em;color:#444">
     <span id="note1">• CUT = czerwona linia ciągła</span><br/>
@@ -79,6 +82,8 @@ const translations = {
         flap: 'Zawinięcie [mm]',
         thick: 'Grubość tektury [mm]',
         button: 'POBIERZ PDF',
+        internal: 'Wprowadzane parametry to wymiary wewnętrzne pudełka.',
+        extLabel: 'Wymiary zewnętrzne pudełka [mm]:' ,
         note1: '• CUT = czerwona linia cięcia',
         note2: '• FOLD = niebieska linia zagięcia',
         note3: '• Skala 1 : 1 (mm) – plik gotowy do sztancy / plotera.',
@@ -93,6 +98,8 @@ const translations = {
         flap: 'Flap [mm]',
         thick: 'Cardboard thickness [mm]',
         button: 'DOWNLOAD PDF',
+        internal: 'Entered parameters refer to internal box dimensions.',
+        extLabel: 'External box dimensions [mm]:' ,
         note1: '• CUT = red solid line',
         note2: '• FOLD = blue dashed line',
         note3: '• Scale 1 : 1 (mm) – ready for die-cut / plotter.',
@@ -111,16 +118,39 @@ function setLang(lang) {
     document.getElementById('label-flap').textContent = t.flap;
     document.getElementById('label-thick').textContent = t.thick;
     document.getElementById('download').textContent = t.button;
+    document.getElementById('internal-info').textContent = t.internal;
+    document.getElementById('external-label').textContent = t.extLabel;
     document.getElementById('note1').textContent = t.note1;
     document.getElementById('note2').textContent = t.note2;
     document.getElementById('note3').textContent = t.note3;
     document.getElementById('note4').textContent = t.note4;
     document.getElementById('box-image').src = t.image;
+    updateExternal();
 }
 
 document.querySelectorAll('.lang-switch button').forEach(btn => {
     btn.addEventListener('click', () => setLang(btn.dataset.lang));
 });
+
+function updateExternal() {
+    const L = parseFloat(document.querySelector('input[name=L]').value) || 0;
+    const B = parseFloat(document.querySelector('input[name=B]').value) || 0;
+    const ep = parseFloat(document.querySelector('select[name=ep1]').value) || 0;
+    let addX = 0, addY = 0;
+    if (ep === 1) { addX = 6.5; addY = 5.5; }
+    else if (ep === 1.5) { addX = 8.5; addY = 7.5; }
+    else if (ep === 2) { addX = 10.5; addY = 9.5; }
+    const xExt = (L + addX).toFixed(1);
+    const yExt = (B + addY).toFixed(1);
+    document.getElementById('external').textContent = xExt + ' × ' + yExt;
+}
+
+document.querySelectorAll('input[name=L], input[name=B], select[name=ep1]').forEach(el => {
+    el.addEventListener('input', updateExternal);
+    el.addEventListener('change', updateExternal);
+});
+
+updateExternal();
 
 // initialize to page language
 setLang(document.documentElement.lang || 'pl');
