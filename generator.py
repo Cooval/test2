@@ -119,7 +119,7 @@ def svg_bytes_from_params(
         line2 = f"{ext_dims[0]:g}×{ext_dims[1]:g}×{ext_dims[2]:g} mm"
         line3 = "Created by www.MBprint.pl"
         base_y = margin / 3
-        line_gap = 6  # vertical spacing between lines in mm
+        line_gap = 11  # vertical spacing between lines in mm
         for i, txt in enumerate((line1, line2, line3)):
             dwg.add(
                 dwg.text(
@@ -153,10 +153,10 @@ def svg_bytes_from_params(
         if logo_file.exists():
             b64 = base64.b64encode(logo_file.read_bytes()).decode()
             # Scale logo to height Z*1.5 while keeping aspect ratio
-            logo_h = H * 1.5
+            logo_h = H * 1
             logo_w = logo_h / LOGO_ASPECT
             # offset from page edges (in mm)
-            offset = 5
+            offset = 0
             logo_x = dwg_w - logo_w - offset
             logo_y = offset
             dwg.add(
