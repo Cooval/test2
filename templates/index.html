@@ -33,11 +33,11 @@
 <form method="post">
     <div class="row">
         <div>
-            <label id="label-height">Y mm (wysokość)</label>
+            <label id="label-height">X mm (wysokość)</label>
             <input type="number" step="0.1" name="L"   value="100" required />
         </div>
         <div>
-            <label id="label-width">X mm (szerokość)</label>
+            <label id="label-width">Y mm (szerokość)</label>
             <input type="number" step="0.1" name="B"   value="100" required />
         </div>
         <div>
@@ -72,8 +72,8 @@
 const translations = {
     pl: {
         title: 'Projekt pudełka (spód/wieko + oklejka)',
-        height: 'Y mm (wysokość)',
-        width: 'X mm (szerokość)',
+        height: 'X mm (wysokość)',
+        width: 'Y mm (szerokość)',
         depth: 'Z mm (głębokość)',
         flap: 'Zawinięcie [mm]',
         thick: 'Grubość tektury [mm]',
@@ -86,8 +86,8 @@ const translations = {
     },
     en: {
         title: 'Box design (bottom/top + wrapper)',
-        height: 'Y mm (height)',
-        width: 'X mm (width)',
+        height: 'X mm (height)',
+        width: 'Y mm (width)',
         depth: 'Z mm (depth)',
         flap: 'Flap [mm]',
         thick: 'Cardboard thickness [mm]',
