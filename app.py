@@ -2,6 +2,9 @@ from flask import Flask, render_template, request, send_file, abort
 from io import BytesIO
 from generator import svg_bytes_from_params
 import cairosvg
+import webbrowser
+import threading
+import time
 
 app = Flask(__name__, static_folder="templates")
 
@@ -19,8 +22,9 @@ def index():
             svg_bytes = svg_bytes_from_params(L, B, H, R, ep1)
             pdf_bytes = cairosvg.svg2pdf(bytestring=svg_bytes)
 
+            filename = f"Box_{L}x{B}x{H}_{ep1}mm.pdf"
             return send_file(BytesIO(pdf_bytes),
-                              download_name="box_net.pdf",
+                              download_name=filename,
                               mimetype="application/pdf",
                               as_attachment=True)
         except (KeyError, ValueError):
@@ -29,4 +33,9 @@ def index():
     return render_template("index.html")
 
 if __name__ == "__main__":
+    def open_browser():
+        time.sleep(1)
+        webbrowser.open_new("http://127.0.0.1:5000/")
+
+    threading.Thread(target=open_browser).start()
     app.run()
