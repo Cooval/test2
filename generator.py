@@ -70,11 +70,11 @@ def _segment_list(v):
 def external_dims(L: float, B: float, H: float, ep: float):
     """Compute external box dimensions used in the info label."""
     if ep == 1:
-        add_x, add_y = 6.5, 5.5
+        add_x, add_y = 6, 6
     elif ep == 1.5:
-        add_x, add_y = 8.5, 7.5
+        add_x, add_y = 8, 8
     elif ep == 2:
-        add_x, add_y = 10.5, 9.5
+        add_x, add_y = 10, 10
     else:
         add_x = add_y = 0
     return (
@@ -117,7 +117,7 @@ def svg_bytes_from_params(
     if ext_dims is not None:
         line1 = f"{L:g}×{B:g}×{H:g} mm"
         line2 = f"{ext_dims[0]:g}×{ext_dims[1]:g}×{ext_dims[2]:g} mm"
-        line3 = "created by MB print"
+        line3 = "Created by www.MBprint.pl"
         base_y = margin / 3
         line_gap = 6  # vertical spacing between lines in mm
         for i, txt in enumerate((line1, line2, line3)):
