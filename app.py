@@ -22,8 +22,10 @@ def index():
             svg_bytes = svg_bytes_from_params(L, B, H, R, ep1)
             pdf_bytes = cairosvg.svg2pdf(bytestring=svg_bytes)
 
+            file_name = f"Box_{L:g}x{B:g}x{H:g}_{ep1:g}mm.pdf"
+
             return send_file(BytesIO(pdf_bytes),
-                              download_name="box_net.pdf",
+                              download_name=file_name,
                               mimetype="application/pdf",
                               as_attachment=True)
         except (KeyError, ValueError):
