@@ -65,7 +65,8 @@
 <p style="margin-top:32px;font-size:0.9em;color:#444">
     <span id="note1">• CUT = czerwona linia ciągła</span><br/>
     <span id="note2">• FOLD = niebieska linia przerywana</span><br/>
-    <span id="note3">• Skala 1 : 1 (mm) – plik gotowy do sztancy / plotera.</span>
+    <span id="note3">• Skala 1 : 1 (mm) – plik gotowy do sztancy / plotera.</span><br/>
+    <span id="note4">• Pamiętaj, aby projekt grafiki wychodził conajmniej 3 mm poza linie cięcia (jako spad drukarski).</span>
 </p>
 
 <script>
@@ -113,6 +114,7 @@ function setLang(lang) {
     document.getElementById('note1').textContent = t.note1;
     document.getElementById('note2').textContent = t.note2;
     document.getElementById('note3').textContent = t.note3;
+    document.getElementById('note4').textContent = t.note4;
     document.getElementById('box-image').src = t.image;
 }
 
