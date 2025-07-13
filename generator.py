@@ -16,7 +16,7 @@ FOLD_STROKE  = {
     'stroke_dasharray': '2,2'
 }
 
-LOGO_ASPECT = 716 / 1000  # height/width ratio of MB-print-logo11.png
+LOGO_ASPECT = 672 / 1000  # height/width ratio of MB-print-logo11.png
 
 def _derived_vars(L, B, H, R, ep):
     """przekładka BuildParameterStack + blok 'formulas' z Twojego skryptu"""
