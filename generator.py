@@ -117,7 +117,7 @@ def svg_bytes_from_params(
     if ext_dims is not None:
         line1 = f"{L:g}×{B:g}×{H:g} mm"
         line2 = f"{ext_dims[0]:g}×{ext_dims[1]:g}×{ext_dims[2]:g} mm"
-        line3 = "Created by www.MBprint.pl"
+        line3 = "www.mbprint.pl"
         base_y = margin / 3
         line_gap = 11  # vertical spacing between lines in mm
         for i, txt in enumerate((line1, line2, line3)):
