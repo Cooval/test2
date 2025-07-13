@@ -147,7 +147,7 @@ def svg_bytes_from_params(
 
     dwg.add(content)
 
-    # Center logo if provided
+    # Position logo in the upper right corner if provided
     if logo_path:
         logo_file = Path(logo_path)
         if logo_file.exists():
@@ -155,8 +155,10 @@ def svg_bytes_from_params(
             # Scale logo to height Z*1.5 while keeping aspect ratio
             logo_h = H * 1.5
             logo_w = logo_h / LOGO_ASPECT
-            logo_x = (dwg_w - logo_w) / 2
-            logo_y = (dwg_h - logo_h) / 2
+            # offset from page edges (in mm)
+            offset = 5
+            logo_x = dwg_w - logo_w - offset
+            logo_y = offset
             dwg.add(
                 dwg.image(
                     href=f"data:image/png;base64,{b64}",
