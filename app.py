@@ -2,6 +2,9 @@ from flask import Flask, render_template, request, send_file, abort
 from io import BytesIO
 from generator import svg_bytes_from_params
 import cairosvg
+import webbrowser
+import threading
+import time
 
 app = Flask(__name__, static_folder="templates")
 
@@ -29,4 +32,9 @@ def index():
     return render_template("index.html")
 
 if __name__ == "__main__":
+    def open_browser():
+        time.sleep(1)
+        webbrowser.open_new("http://127.0.0.1:5000/")
+
+    threading.Thread(target=open_browser).start()
     app.run()
