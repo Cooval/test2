@@ -138,9 +138,9 @@ function updateExternal() {
     const H = parseFloat(document.querySelector('input[name=H]').value) || 0;
     const ep = parseFloat(document.querySelector('select[name=ep1]').value) || 0;
     let addX = 0, addY = 0;
-    if (ep === 1) { addX = 6.5; addY = 5.5; }
-    else if (ep === 1.5) { addX = 8.5; addY = 7.5; }
-    else if (ep === 2) { addX = 10.5; addY = 9.5; }
+    if (ep === 1) { addX = 6; addY = 6; }
+    else if (ep === 1.5) { addX = 8; addY = 8; }
+    else if (ep === 2) { addX = 10; addY = 10; }
     const xExt = (L + addX).toFixed(1);
     const yExt = (B + addY).toFixed(1);
     const zExt = (H + ep).toFixed(1);
