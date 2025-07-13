@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, send_file, abort
 from io import BytesIO
-from generator import svg_bytes_from_params
+from generator import svg_bytes_from_params, external_dims
 import cairosvg
 import webbrowser
 import threading
@@ -19,7 +19,17 @@ def index():
             R   = float(request.form["R"])
             ep1 = float(request.form["ep1"])    # = th1
 
-            svg_bytes = svg_bytes_from_params(L, B, H, R, ep1)
+            ext_dims = external_dims(L, B, H, ep1)
+            logo = app.static_folder + "/MB-print-logo11.png"
+            svg_bytes = svg_bytes_from_params(
+                L,
+                B,
+                H,
+                R,
+                ep1,
+                logo_path=logo,
+                ext_dims=ext_dims,
+            )
             pdf_bytes = cairosvg.svg2pdf(bytestring=svg_bytes)
 
             file_name = f"Box_{L:g}x{B:g}x{H:g}_{ep1:g}mm.pdf"
