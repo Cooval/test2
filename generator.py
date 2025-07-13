@@ -126,7 +126,7 @@ def svg_bytes_from_params(
         )
 
     # group with translation to keep margin and center
-    content = dwg.g(transform=f"translate({margin - min_x}mm,{margin - min_y}mm)")
+    content = dwg.g(transform=f"translate({margin - min_x},{margin - min_y})")
     cut_layer = content.add(dwg.g(id="CUT", **CUT_STROKE))
     fold_layer = content.add(dwg.g(id="FOLD", **FOLD_STROKE))
 
