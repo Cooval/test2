@@ -26,22 +26,22 @@
 <h2 id="title">Projekt pudełka (spód/wieko + oklejka)</h2>
 
 <div class="box-diagram">
-    <img src="https://pandagm.com/wp-content/uploads/2022/06/twoPieceBoxDimensions.gif" alt="Box dimensions"/>
+    <img id="box-image" src="{{ url_for('static', filename='pud_pl.jpg') }}" alt="Box dimensions"/>
     <img class="logo-overlay" src="https://www.mbprint.pl/wp-content/uploads/2020/07/MB-print-logo11.png" alt="MB print logo"/>
 </div>
 
 <form method="post">
     <div class="row">
         <div>
-            <label id="label-height">Wysokość pudełka&nbsp;[mm]</label>
+            <label id="label-height">Y mm (wysokość)</label>
             <input type="number" step="0.1" name="L"   value="100" required />
         </div>
         <div>
-            <label id="label-width">Szerokość pudełka&nbsp;[mm]</label>
+            <label id="label-width">X mm (szerokość)</label>
             <input type="number" step="0.1" name="B"   value="100" required />
         </div>
         <div>
-            <label id="label-depth">Głębokość pudełka&nbsp;[mm]</label>
+            <label id="label-depth">Z mm (głębokość)</label>
             <input type="number" step="0.1" name="H"   value="50"  required />
         </div>
     </div>
@@ -72,27 +72,29 @@
 const translations = {
     pl: {
         title: 'Projekt pudełka (spód/wieko + oklejka)',
-        height: 'Wysokość pudełka [mm]',
-        width: 'Szerokość pudełka [mm]',
-        depth: 'Głębokość pudełka [mm]',
+        height: 'Y mm (wysokość)',
+        width: 'X mm (szerokość)',
+        depth: 'Z mm (głębokość)',
         flap: 'Zawinięcie [mm]',
         thick: 'Grubość tektury [mm]',
         button: 'POBIERZ PDF',
         note1: '• CUT = czerwona linia ciągła',
         note2: '• FOLD = niebieska linia przerywana',
-        note3: '• Skala 1 : 1 (mm) – plik gotowy do sztancy / plotera.'
+        note3: '• Skala 1 : 1 (mm) – plik gotowy do sztancy / plotera.',
+        image: "{{ url_for('static', filename='pud_pl.jpg') }}"
     },
     en: {
         title: 'Box design (bottom/top + wrapper)',
-        height: 'Box height [mm]',
-        width: 'Box width [mm]',
-        depth: 'Box depth [mm]',
+        height: 'Y mm (height)',
+        width: 'X mm (width)',
+        depth: 'Z mm (depth)',
         flap: 'Flap [mm]',
         thick: 'Cardboard thickness [mm]',
         button: 'DOWNLOAD PDF',
         note1: '• CUT = red solid line',
         note2: '• FOLD = blue dashed line',
-        note3: '• Scale 1 : 1 (mm) – ready for die-cut / plotter.'
+        note3: '• Scale 1 : 1 (mm) – ready for die-cut / plotter.',
+        image: "{{ url_for('static', filename='pud_en.jpg') }}"
     }
 };
 
@@ -109,6 +111,7 @@ function setLang(lang) {
     document.getElementById('note1').textContent = t.note1;
     document.getElementById('note2').textContent = t.note2;
     document.getElementById('note3').textContent = t.note3;
+    document.getElementById('box-image').src = t.image;
 }
 
 document.querySelectorAll('.lang-switch button').forEach(btn => {
