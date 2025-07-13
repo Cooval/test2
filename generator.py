@@ -126,7 +126,7 @@ def svg_bytes_from_params(
                     txt,
                     insert=(f"{dwg_w / 2}mm", f"{base_y + i * line_gap}mm"),
                     text_anchor="middle",
-                    font_size="6mm",
+                    font_size="10mm",
                     font_family="sans-serif",
                 )
             )
