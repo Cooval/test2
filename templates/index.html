@@ -78,9 +78,10 @@ const translations = {
         flap: 'Zawinięcie [mm]',
         thick: 'Grubość tektury [mm]',
         button: 'POBIERZ PDF',
-        note1: '• CUT = czerwona linia ciągła',
-        note2: '• FOLD = niebieska linia przerywana',
+        note1: '• CUT = czerwona linia cięcia',
+        note2: '• FOLD = niebieska linia zagięcia',
         note3: '• Skala 1 : 1 (mm) – plik gotowy do sztancy / plotera.',
+        note4: '• Pamiętaj, aby projekt grafiki wychodził conajmniej o 3 mm poza linie cięcia (jako spad drukarski)',
         image: "{{ url_for('static', filename='pud_pl.jpg') }}"
     },
     en: {
@@ -94,6 +95,7 @@ const translations = {
         note1: '• CUT = red solid line',
         note2: '• FOLD = blue dashed line',
         note3: '• Scale 1 : 1 (mm) – ready for die-cut / plotter.',
+        note4: '• Remember that the graphic design should extend at least 3 mm beyond the cutting lines (as a printing bleed))',
         image: "{{ url_for('static', filename='pud_en.jpg') }}"
     }
 };
