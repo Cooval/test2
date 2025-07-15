@@ -112,6 +112,8 @@ def svg_bytes_from_params(
     dwg_h = height + 2 * margin
 
     dwg = svgwrite.Drawing(size=(f"{dwg_w}mm", f"{dwg_h}mm"), profile="tiny")
+    # ensure transforms use mm units by matching viewBox to physical size
+    dwg.viewbox(width=dwg_w, height=dwg_h)
 
     # group with translation to keep margin and center
     content = dwg.g(transform=f"translate({margin - min_x},{margin - min_y})")
