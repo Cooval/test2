@@ -113,6 +113,25 @@ def svg_bytes_from_params(
 
     dwg = svgwrite.Drawing(size=(f"{dwg_w}mm", f"{dwg_h}mm"), profile="tiny")
 
+    # group with translation to keep margin and center
+    content = dwg.g(transform=f"translate({margin - min_x},{margin - min_y})")
+    cut_layer = content.add(dwg.g(id="CUT", **CUT_STROKE))
+    fold_layer = content.add(dwg.g(id="FOLD", **FOLD_STROKE))
+
+    for kind, x0, y0, x1, y1 in segs:
+        layer = cut_layer if kind == "CUT" else fold_layer
+        layer.add(
+            dwg.line(
+                start=(f"{x0}mm", f"{y0}mm"),
+                end=(f"{x1}mm", f"{y1}mm"),
+            )
+        )
+
+    # Rotate entire sheet with lines 90 degrees counter-clockwise
+    rotated = dwg.g(transform=f"rotate(-90,{dwg_w/2},{dwg_h/2})")
+    rotated.add(content)
+    dwg.add(rotated)
+
     # Informational text on top margin split into three lines
     if ext_dims is not None:
         line1 = f"{L:g}×{B:g}×{H:g} mm"
@@ -130,22 +149,6 @@ def svg_bytes_from_params(
                     font_family="sans-serif",
                 )
             )
-
-    # group with translation to keep margin and center
-    content = dwg.g(transform=f"translate({margin - min_x},{margin - min_y})")
-    cut_layer = content.add(dwg.g(id="CUT", **CUT_STROKE))
-    fold_layer = content.add(dwg.g(id="FOLD", **FOLD_STROKE))
-
-    for kind, x0, y0, x1, y1 in segs:
-        layer = cut_layer if kind == "CUT" else fold_layer
-        layer.add(
-            dwg.line(
-                start=(f"{x0}mm", f"{y0}mm"),
-                end=(f"{x1}mm", f"{y1}mm"),
-            )
-        )
-
-    dwg.add(content)
 
     # Position logo in the upper right corner if provided
     if logo_path:
