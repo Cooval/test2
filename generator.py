@@ -111,25 +111,13 @@ def svg_bytes_from_params(
     dwg_w = width + 2 * margin
     dwg_h = height + 2 * margin
 
-    dwg = svgwrite.Drawing(size=(f"{dwg_w}mm", f"{dwg_h}mm"), profile="tiny")
+    # after rotating the line layout 90° the page dimensions swap
+    page_w = dwg_h
+    page_h = dwg_w
 
-    # Informational text on top margin split into three lines
-    if ext_dims is not None:
-        line1 = f"{L:g}×{B:g}×{H:g} mm"
-        line2 = f"{ext_dims[0]:g}×{ext_dims[1]:g}×{ext_dims[2]:g} mm"
-        line3 = "www.mbprint.pl"
-        base_y = margin / 3
-        line_gap = 11  # vertical spacing between lines in mm
-        for i, txt in enumerate((line1, line2, line3)):
-            dwg.add(
-                dwg.text(
-                    txt,
-                    insert=(f"{dwg_w / 2}mm", f"{base_y + i * line_gap}mm"),
-                    text_anchor="middle",
-                    font_size="10mm",
-                    font_family="sans-serif",
-                )
-            )
+    dwg = svgwrite.Drawing(size=(f"{page_w}mm", f"{page_h}mm"), profile="tiny")
+    # ensure transforms use mm units by matching viewBox to physical size
+    dwg.viewbox(width=page_w, height=page_h)
 
     # group with translation to keep margin and center
     content = dwg.g(transform=f"translate({margin - min_x},{margin - min_y})")
@@ -145,7 +133,28 @@ def svg_bytes_from_params(
             )
         )
 
-    dwg.add(content)
+    # Rotate entire sheet with lines 90 degrees counter-clockwise
+    rotated = dwg.g(transform=f"rotate(-90) translate(0,{page_h})")
+    rotated.add(content)
+    dwg.add(rotated)
+
+    # Informational text on top margin split into three lines
+    if ext_dims is not None:
+        line1 = f"{L:g}×{B:g}×{H:g} mm"
+        line2 = f"{ext_dims[0]:g}×{ext_dims[1]:g}×{ext_dims[2]:g} mm"
+        line3 = "www.mbprint.pl"
+        base_y = margin / 3
+        line_gap = 11  # vertical spacing between lines in mm
+        for i, txt in enumerate((line1, line2, line3)):
+            dwg.add(
+                dwg.text(
+                    txt,
+                    insert=(f"{page_w / 2}mm", f"{base_y + i * line_gap}mm"),
+                    text_anchor="middle",
+                    font_size="10mm",
+                    font_family="sans-serif",
+                )
+            )
 
     # Position logo in the upper right corner if provided
     if logo_path:
@@ -157,7 +166,7 @@ def svg_bytes_from_params(
             logo_w = logo_h / LOGO_ASPECT
             # offset from page edges (in mm)
             offset = 0
-            logo_x = dwg_w - logo_w - offset
+            logo_x = page_w - logo_w - offset
             logo_y = offset
             dwg.add(
                 dwg.image(
