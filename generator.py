@@ -108,10 +108,37 @@ def svg_bytes_from_params(
     # margin depends on Z dimension (H parameter)
     margin = 0.5 * H
 
-    dwg_w = width + 2 * margin
-    dwg_h = height + 2 * margin
-
+    # swap width/height for 90° CCW rotation and create drawing
+    dwg_w = height + 2 * margin
+    dwg_h = width + 2 * margin
     dwg = svgwrite.Drawing(size=(f"{dwg_w}mm", f"{dwg_h}mm"), profile="tiny")
+
+    # transformation to rotate and center the content
+    tx = margin - min_x
+    ty = margin - min_y
+    cx = width / 2 + margin
+    cy = height / 2 + margin
+    dx = (height - width) / 2
+    dy = (width - height) / 2
+    transform = (
+        f"translate({dx},{dy}) rotate(-90,{cx},{cy}) translate({tx},{ty})"
+    )
+
+    # group with translation to keep margin, rotate and center
+    content = dwg.g(transform=transform)
+    cut_layer = content.add(dwg.g(id="CUT", **CUT_STROKE))
+    fold_layer = content.add(dwg.g(id="FOLD", **FOLD_STROKE))
+
+    for kind, x0, y0, x1, y1 in segs:
+        layer = cut_layer if kind == "CUT" else fold_layer
+        layer.add(
+            dwg.line(
+                start=(f"{x0}mm", f"{y0}mm"),
+                end=(f"{x1}mm", f"{y1}mm"),
+            )
+        )
+
+    dwg.add(content)
 
     # Informational text on top margin split into three lines
     if ext_dims is not None:
@@ -130,22 +157,6 @@ def svg_bytes_from_params(
                     font_family="sans-serif",
                 )
             )
-
-    # group with translation to keep margin and center
-    content = dwg.g(transform=f"translate({margin - min_x},{margin - min_y})")
-    cut_layer = content.add(dwg.g(id="CUT", **CUT_STROKE))
-    fold_layer = content.add(dwg.g(id="FOLD", **FOLD_STROKE))
-
-    for kind, x0, y0, x1, y1 in segs:
-        layer = cut_layer if kind == "CUT" else fold_layer
-        layer.add(
-            dwg.line(
-                start=(f"{x0}mm", f"{y0}mm"),
-                end=(f"{x1}mm", f"{y1}mm"),
-            )
-        )
-
-    dwg.add(content)
 
     # Position logo in the upper right corner if provided
     if logo_path:
