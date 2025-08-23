@@ -97,24 +97,29 @@ def svg_bytes_from_params(
     v = _derived_vars(L, B, H, R, ep)
     segs = _segment_list(v)
 
-    # Determine bounding box of generated segments
-    min_x = min(min(x0, x1) for _, x0, _, x1, _ in segs)
-    min_y = min(min(y0, y1) for _, _, y0, _, y1 in segs)
-    max_x = max(max(x0, x1) for _, x0, _, x1, _ in segs)
-    max_y = max(max(y0, y1) for _, _, y0, _, y1 in segs)
+    # Najpierw obracamy wszystkie segmenty o 90 stopni matematycznie
+    # Obrót o 90 stopni: (x,y) -> (-y,x)
+    rotated_segs = []
+    for kind, x0, y0, x1, y1 in segs:
+        # Obracamy każdy punkt o 90 stopni
+        new_x0, new_y0 = -y0, x0
+        new_x1, new_y1 = -y1, x1
+        rotated_segs.append((kind, new_x0, new_y0, new_x1, new_y1))
+    
+    # Teraz obliczamy bounding box obróconych segmentów
+    min_x = min(min(x0, x1) for _, x0, _, x1, _ in rotated_segs)
+    min_y = min(min(y0, y1) for _, _, y0, _, y1 in rotated_segs)
+    max_x = max(max(x0, x1) for _, x0, _, x1, _ in rotated_segs)
+    max_y = max(max(y0, y1) for _, _, y0, _, y1 in rotated_segs)
 
     width = max_x - min_x
     height = max_y - min_y
     
-    # Po obrocie o 90 stopni wymiary się zamieniają
-    rotated_width = height
-    rotated_height = width
-    
     # margin depends on Z dimension (H parameter)
     margin = 0.5 * H
 
-    dwg_w = rotated_width + 2 * margin
-    dwg_h = rotated_height + 2 * margin
+    dwg_w = width + 2 * margin
+    dwg_h = height + 2 * margin
 
     dwg = svgwrite.Drawing(size=(f"{dwg_w}mm", f"{dwg_h}mm"), profile="tiny")
 
@@ -136,27 +141,11 @@ def svg_bytes_from_params(
                 )
             )
 
-    # Grupa z transformacją do obrócenia o 90 stopni i wycentrowania
-    # Strategia: 
-    # 1. Przenieś wykrojnik tak żeby jego środek był w (0,0)
-    # 2. Obróć o 90 stopni 
-    # 3. Przenieś do środka canvas-a z marginesem
+    # Grupa z przesunięciem żeby zachować margines
+    content = dwg.g(transform=f"translate({margin - min_x},{margin - min_y})")
     
-    # Środek oryginalnego wykrojnika
-    orig_center_x = (min_x + max_x) / 2
-    orig_center_y = (min_y + max_y) / 2
-    
-    # Środek docelowego canvas-a
-    target_center_x = dwg_w / 2
-    target_center_y = dwg_h / 2
-    
-    # Transformacja składająca się z trzech kroków:
-    # 1. translate(-orig_center_x, -orig_center_y) - przesuń środek wykrojnika do (0,0)
-    # 2. rotate(90) - obróć o 90 stopni wokół (0,0)
-    # 3. translate(target_center_x, target_center_y) - przesuń do środka canvas-a
-    transform = f"translate({target_center_x},{target_center_y}) rotate(90) translate({-orig_center_x},{-orig_center_y})"
-    
-    content = dwg.g(transform=transform)
+    # Używamy już obróconych segmentów
+    segs = rotated_segs
     cut_layer = content.add(dwg.g(id="CUT", **CUT_STROKE))
     fold_layer = content.add(dwg.g(id="FOLD", **FOLD_STROKE))
 
