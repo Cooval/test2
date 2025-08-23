@@ -1,5 +1,5 @@
 """
-generator.py – rysuje siatkę pudełka (spód + oklejka) dokładnie wg logiki
+generator.py — rysuje siatkę pudełka (spód + oklejka) dokładnie wg logiki
 oryginalnego skryptu PackLib, ale bez żadnych bibliotek CAD.
 """
 import svgwrite
@@ -47,10 +47,10 @@ def _derived_vars(L, B, H, R, ep):
 
 def _segment_list(v):
     """
-    1:1 port z PackLib – każda krotka: (CUT/FOLD, x0,y0,x1,y1)
+    1:1 port z PackLib — każda krotka: (CUT/FOLD, x0,y0,x1,y1)
     ▸ Dla czytelności trzymam tu tylko kilkanaście pierwszych odcinków.
     ▸ **PEŁNĄ** listę (160 + 82 + 162 = 404 segmenty) znajdziesz w pliku
-      `segments_full.py` – jest generowana automatem z Twojego źródła
+      `segments_full.py` — jest generowana automatem z Twojego źródła
       i importowana tutaj, żeby kod główny pozostał przejrzysty.
     """
     from segments_full import SEGMENTS
@@ -61,7 +61,7 @@ def _segment_list(v):
         y0 = fy0(v) if callable(fy0) else fy0
         x1 = fx1(v) if callable(fx1) else fx1
         y1 = fy1(v) if callable(fy1) else fy1
-        # pomijamy zerowe długości (zabezpieczenie – float’y)
+        # pomijamy zerowe długości (zabezpieczenie — floaty)
         if not isclose(x0, x1) or not isclose(y0, y1):
             out.append((kind, x0, y0, x1, y1))
     return out
@@ -105,11 +105,16 @@ def svg_bytes_from_params(
 
     width = max_x - min_x
     height = max_y - min_y
+    
+    # Po obrocie o 90 stopni wymiary się zamieniają
+    rotated_width = height
+    rotated_height = width
+    
     # margin depends on Z dimension (H parameter)
     margin = 0.5 * H
 
-    dwg_w = width + 2 * margin
-    dwg_h = height + 2 * margin
+    dwg_w = rotated_width + 2 * margin
+    dwg_h = rotated_height + 2 * margin
 
     dwg = svgwrite.Drawing(size=(f"{dwg_w}mm", f"{dwg_h}mm"), profile="tiny")
 
@@ -131,8 +136,22 @@ def svg_bytes_from_params(
                 )
             )
 
-    # group with translation to keep margin and center
-    content = dwg.g(transform=f"translate({margin - min_x},{margin - min_y})")
+    # Grupa z transformacją do obrócenia o 90 stopni i wycentrowania
+    # Obliczenia dla centrowania po obrocie:
+    # 1. Przenosimy do środka oryginalnego układu współrzędnych
+    # 2. Obracamy o 90 stopni
+    # 3. Przenosimy żeby wycentrować w nowym układzie
+    
+    center_x = dwg_w / 2
+    center_y = dwg_h / 2
+    
+    # Transformacja: 
+    # 1. translate do środka canvas
+    # 2. rotate o 90 stopni
+    # 3. translate żeby wykrojnik był wycentrowany
+    transform = f"translate({center_x},{center_y}) rotate(90) translate({-width/2 - min_x},{-height/2 - min_y})"
+    
+    content = dwg.g(transform=transform)
     cut_layer = content.add(dwg.g(id="CUT", **CUT_STROKE))
     fold_layer = content.add(dwg.g(id="FOLD", **FOLD_STROKE))
 
