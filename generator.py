@@ -97,13 +97,13 @@ def svg_bytes_from_params(
     v = _derived_vars(L, B, H, R, ep)
     segs = _segment_list(v)
 
-    # Najpierw obracamy wszystkie segmenty o 90 stopni matematycznie
-    # Obrót o 90 stopni: (x,y) -> (-y,x)
+    # Obracamy wszystkie segmenty o 90 stopni matematycznie
+    # Obrót o 90 stopni zgodnie z ruchem wskazówek zegara: (x,y) -> (y,-x)
     rotated_segs = []
     for kind, x0, y0, x1, y1 in segs:
         # Obracamy każdy punkt o 90 stopni
-        new_x0, new_y0 = -y0, x0
-        new_x1, new_y1 = -y1, x1
+        new_x0, new_y0 = y0, -x0
+        new_x1, new_y1 = y1, -x1
         rotated_segs.append((kind, new_x0, new_y0, new_x1, new_y1))
     
     # Teraz obliczamy bounding box obróconych segmentów
@@ -141,15 +141,13 @@ def svg_bytes_from_params(
                 )
             )
 
-    # Grupa z przesunięciem żeby zachować margines
+    # Grupa z przesunięciem żeby zachować marginesy
     content = dwg.g(transform=f"translate({margin - min_x},{margin - min_y})")
-    
-    # Używamy już obróconych segmentów
-    segs = rotated_segs
     cut_layer = content.add(dwg.g(id="CUT", **CUT_STROKE))
     fold_layer = content.add(dwg.g(id="FOLD", **FOLD_STROKE))
 
-    for kind, x0, y0, x1, y1 in segs:
+    # Używamy obróconych segmentów
+    for kind, x0, y0, x1, y1 in rotated_segs:
         layer = cut_layer if kind == "CUT" else fold_layer
         layer.add(
             dwg.line(
