@@ -137,19 +137,24 @@ def svg_bytes_from_params(
             )
 
     # Grupa z transformacją do obrócenia o 90 stopni i wycentrowania
-    # Obliczenia dla centrowania po obrocie:
-    # 1. Przenosimy do środka oryginalnego układu współrzędnych
-    # 2. Obracamy o 90 stopni
-    # 3. Przenosimy żeby wycentrować w nowym układzie
+    # Strategia: 
+    # 1. Przenieś wykrojnik tak żeby jego środek był w (0,0)
+    # 2. Obróć o 90 stopni 
+    # 3. Przenieś do środka canvas-a z marginesem
     
-    center_x = dwg_w / 2
-    center_y = dwg_h / 2
+    # Środek oryginalnego wykrojnika
+    orig_center_x = (min_x + max_x) / 2
+    orig_center_y = (min_y + max_y) / 2
     
-    # Transformacja: 
-    # 1. translate do środka canvas
-    # 2. rotate o 90 stopni
-    # 3. translate żeby wykrojnik był wycentrowany
-    transform = f"translate({center_x},{center_y}) rotate(90) translate({-width/2 - min_x},{-height/2 - min_y})"
+    # Środek docelowego canvas-a
+    target_center_x = dwg_w / 2
+    target_center_y = dwg_h / 2
+    
+    # Transformacja składająca się z trzech kroków:
+    # 1. translate(-orig_center_x, -orig_center_y) - przesuń środek wykrojnika do (0,0)
+    # 2. rotate(90) - obróć o 90 stopni wokół (0,0)
+    # 3. translate(target_center_x, target_center_y) - przesuń do środka canvas-a
+    transform = f"translate({target_center_x},{target_center_y}) rotate(90) translate({-orig_center_x},{-orig_center_y})"
     
     content = dwg.g(transform=transform)
     cut_layer = content.add(dwg.g(id="CUT", **CUT_STROKE))
