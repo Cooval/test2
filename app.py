@@ -5,6 +5,7 @@ import cairosvg
 import webbrowser
 import threading
 import time
+import os
 
 app = Flask(__name__, static_folder="templates")
 
@@ -41,12 +42,17 @@ def index():
         except (KeyError, ValueError):
             abort(400, "Niepoprawne dane wejściowe")
 
+
     return render_template("index.html")
 
-if __name__ == "__main__":
-    def open_browser():
-        time.sleep(1)
-        webbrowser.open_new("http://127.0.0.1:5000/")
+# if __name__ == "__main__":
+#    def open_browser():
+#        time.sleep(1)
+#        webbrowser.open_new("http://127.0.0.1:5000/")
+#
+#    threading.Thread(target=open_browser).start()
+#    app.run()
 
-    threading.Thread(target=open_browser).start()
-    app.run()
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
