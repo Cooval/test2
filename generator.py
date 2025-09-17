@@ -97,39 +97,85 @@ def svg_bytes_from_params(
     v = _derived_vars(L, B, H, R, ep)
     segs = _segment_list(v)
 
-    # Obracamy wszystkie segmenty o 90 stopni matematycznie
-    # Obrót o 90 stopni zgodnie z ruchem wskazówek zegara: (x,y) -> (y,-x)
-    rotated_segs = []
-    for kind, x0, y0, x1, y1 in segs:
-        # Obracamy każdy punkt o 90 stopni
-        new_x0, new_y0 = y0, -x0
-        new_x1, new_y1 = y1, -x1
-        rotated_segs.append((kind, new_x0, new_y0, new_x1, new_y1))
-    
-    # Teraz obliczamy bounding box obróconych segmentów
-    min_x = min(min(x0, x1) for _, x0, _, x1, _ in rotated_segs)
-    min_y = min(min(y0, y1) for _, _, y0, _, y1 in rotated_segs)
-    max_x = max(max(x0, x1) for _, x0, _, x1, _ in rotated_segs)
-    max_y = max(max(y0, y1) for _, _, y0, _, y1 in rotated_segs)
+    # Wyznaczamy bounding box segmentów przed obrotem
+    xs: list[float] = []
+    ys: list[float] = []
+    for _, x0, y0, x1, y1 in segs:
+        xs.extend((x0, x1))
+        ys.extend((y0, y1))
 
-    width = max_x - min_x
-    height = max_y - min_y
-    
-    # margin depends on Z dimension (H parameter)
+    min_x, max_x = min(xs), max(xs)
+    min_y, max_y = min(ys), max(ys)
+    center_x = (min_x + max_x) / 2
+    center_y = (min_y + max_y) / 2
+
+    def _rotate_clockwise(x: float, y: float) -> tuple[float, float]:
+        """Zwróć punkt po obrocie o -90° (zgodnie ze wskazówkami zegara)."""
+
+        return y, -x
+
+    rotated_points: list[tuple[float, float]] = []
+    for _, x0, y0, x1, y1 in segs:
+        rotated_points.append(_rotate_clockwise(x0 - center_x, y0 - center_y))
+        rotated_points.append(_rotate_clockwise(x1 - center_x, y1 - center_y))
+
+    rot_min_x = min(x for x, _ in rotated_points)
+    rot_max_x = max(x for x, _ in rotated_points)
+    rot_min_y = min(y for _, y in rotated_points)
+    rot_max_y = max(y for _, y in rotated_points)
+
+    rot_width = rot_max_x - rot_min_x
+    rot_height = rot_max_y - rot_min_y
+
+    # margines zależy od wysokości pudełka (parametr H)
     margin = 0.5 * H
 
-    dwg_w = width + 2 * margin
-    dwg_h = height + 2 * margin
+    line_gap = 11  # odstęp między liniami tekstu w mm
+    text_block_height = 0.0
+    if ext_dims is not None:
+        # trzy linie tekstu + przybliżona wysokość liter (10 mm)
+        text_block_height = (3 - 1) * line_gap + 10
+
+    required_w = rot_width + 2 * margin
+    required_h = rot_height + 2 * margin + text_block_height
+
+    # Domyślny rozmiar arkusza — A4 poziomo (w mm)
+    default_w, default_h = 297.0, 210.0
+    dwg_w = max(default_w, required_w)
+    dwg_h = max(default_h, required_h)
 
     dwg = svgwrite.Drawing(size=(f"{dwg_w}mm", f"{dwg_h}mm"), profile="tiny")
 
-    # Informational text on top margin split into three lines
+    page_center_x = dwg_w / 2
+    page_center_y = dwg_h / 2
+    top_margin = (dwg_h - rot_height) / 2
+
+    # Grupa z liniami — najpierw rysujemy, następnie obracamy i centrujemy
+    content = dwg.g(id="CONTENT")
+    cut_layer = content.add(dwg.g(id="CUT", **CUT_STROKE))
+    fold_layer = content.add(dwg.g(id="FOLD", **FOLD_STROKE))
+
+    for kind, x0, y0, x1, y1 in segs:
+        layer = cut_layer if kind == "CUT" else fold_layer
+        layer.add(
+            dwg.line(
+                start=(f"{x0}mm", f"{y0}mm"),
+                end=(f"{x1}mm", f"{y1}mm"),
+            )
+        )
+
+    content.attribs["transform"] = (
+        f"translate({page_center_x:g},{page_center_y:g}) rotate(-90) "
+        f"translate({-center_x:g},{-center_y:g})"
+    )
+    dwg.add(content)
+
+    # Tekst informacyjny rozmieszczony nad rysunkiem
     if ext_dims is not None:
         line1 = f"{L:g}×{B:g}×{H:g} mm"
         line2 = f"{ext_dims[0]:g}×{ext_dims[1]:g}×{ext_dims[2]:g} mm"
         line3 = "www.mbprint.pl"
-        base_y = margin / 3
-        line_gap = 11  # vertical spacing between lines in mm
+        base_y = max(10, top_margin / 2 - text_block_height / 2)
         for i, txt in enumerate((line1, line2, line3)):
             dwg.add(
                 dwg.text(
@@ -141,35 +187,16 @@ def svg_bytes_from_params(
                 )
             )
 
-    # Grupa z przesunięciem żeby zachować marginesy
-    content = dwg.g(transform=f"translate({margin - min_x},{margin - min_y})")
-    cut_layer = content.add(dwg.g(id="CUT", **CUT_STROKE))
-    fold_layer = content.add(dwg.g(id="FOLD", **FOLD_STROKE))
-
-    # Używamy obróconych segmentów
-    for kind, x0, y0, x1, y1 in rotated_segs:
-        layer = cut_layer if kind == "CUT" else fold_layer
-        layer.add(
-            dwg.line(
-                start=(f"{x0}mm", f"{y0}mm"),
-                end=(f"{x1}mm", f"{y1}mm"),
-            )
-        )
-
-    dwg.add(content)
-
-    # Position logo in the upper right corner if provided
+    # Logo w prawym górnym rogu
     if logo_path:
         logo_file = Path(logo_path)
         if logo_file.exists():
             b64 = base64.b64encode(logo_file.read_bytes()).decode()
-            # Scale logo to height Z*1.5 while keeping aspect ratio
             logo_h = H * 1
             logo_w = logo_h / LOGO_ASPECT
-            # offset from page edges (in mm)
             offset = 0
             logo_x = dwg_w - logo_w - offset
-            logo_y = offset
+            logo_y = max(offset, top_margin - logo_h - offset)
             dwg.add(
                 dwg.image(
                     href=f"data:image/png;base64,{b64}",
