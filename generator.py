@@ -113,24 +113,54 @@ def svg_bytes_from_params(
 
     dwg = svgwrite.Drawing(size=(f"{dwg_w}mm", f"{dwg_h}mm"), profile="tiny")
 
-    # Informational text on top margin split into three lines
+#   // # Informational text on top margin split into three lines
+#   // if ext_dims is not None:
+#   //     line1 = f"{L:g}×{B:g}×{H:g} mm"
+#   //     line2 = f"{ext_dims[0]:g}×{ext_dims[1]:g}×{ext_dims[2]:g} mm"
+#   //    line3 = "www.mbprint.pl"
+#   //     base_y = margin / 3
+#   //     line_gap = 11  # vertical spacing between lines in mm
+#   //     for i, txt in enumerate((line1, line2, line3)):
+#   //         dwg.add(
+#   //             dwg.text(
+#   //                 txt,
+#   //                 insert=(f"{dwg_w / 2}mm", f"{base_y + i * line_gap}mm"),
+#   //                 text_anchor="middle",
+#   //                 font_size="10mm",
+#   //                 font_family="sans-serif",
+#   //             )
+#   //         )
+
+# Informational text on top margin split into five lines
     if ext_dims is not None:
-        line1 = f"{L:g}×{B:g}×{H:g} mm"
-        line2 = f"{ext_dims[0]:g}×{ext_dims[1]:g}×{ext_dims[2]:g} mm"
-        line3 = "www.mbprint.pl"
+        # Definicja 5 linii tekstu zgodnie z instrukcją
+        texts = [
+            "Wymiar wewnętrzny",                                     # Nowy napis
+            f"{L:g}×{B:g}×{H:g} mm",                                 # Dawna linia 1
+            "Wymiar zewnętrzny",                                     # Nowy napis
+            f"{ext_dims[0]:g}×{ext_dims[1]:g}×{ext_dims[2]:g} mm",   # Dawna linia 2
+            "www.mbprint.pl"                                         # Dawna linia 3
+        ]
+
         base_y = margin / 3
-        line_gap = 11  # vertical spacing between lines in mm
-        for i, txt in enumerate((line1, line2, line3)):
+        
+        # Przeskalowanie, aby 5 linii zmieściło się w miejscu 3
+        # Oryginalnie: gap 11mm, font 10mm. Mnożymy przez 0.6 (3/5)
+        line_gap = 6.6  
+        current_font_size = 6 
+
+        for i, txt in enumerate(texts):
             dwg.add(
                 dwg.text(
                     txt,
                     insert=(f"{dwg_w / 2}mm", f"{base_y + i * line_gap}mm"),
                     text_anchor="middle",
-                    font_size="10mm",
+                    font_size=f"{current_font_size}mm",
                     font_family="sans-serif",
                 )
             )
-
+       
+       
     # group with translation to keep margin and center
     content = dwg.g(transform=f"translate({margin - min_x},{margin - min_y})")
     cut_layer = content.add(dwg.g(id="CUT", **CUT_STROKE))
@@ -168,3 +198,4 @@ def svg_bytes_from_params(
             )
 
     return dwg.tostring().encode("utf-8")
+
