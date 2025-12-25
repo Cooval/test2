@@ -135,9 +135,9 @@ def svg_bytes_from_params(
     if ext_dims is not None:
         # Definicja 5 linii tekstu zgodnie z instrukcją
         texts = [
-            "Wymiar wewnętrzny",                                     # Nowy napis
+            "Inner Size:",                                     # Nowy napis
             f"{L:g}×{B:g}×{H:g} mm",                                 # Dawna linia 1
-            "Wymiar zewnętrzny",                                     # Nowy napis
+            "Outer Size:",                                     # Nowy napis
             f"{ext_dims[0]:g}×{ext_dims[1]:g}×{ext_dims[2]:g} mm",   # Dawna linia 2
             "www.mbprint.pl"                                         # Dawna linia 3
         ]
@@ -198,4 +198,5 @@ def svg_bytes_from_params(
             )
 
     return dwg.tostring().encode("utf-8")
+
 
