@@ -4,7 +4,7 @@ expertMode = true
 
 [nix]
 channel = "stable-25_05"
-packages = ["cairo", "libxcrypt", "pkg-config"]
+packages = ["cairo", "freetype", "glibcLocales", "libxcrypt", "pkg-config"]
 
 [workflows]
 runButton = "Project"

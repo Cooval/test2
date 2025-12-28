@@ -47,7 +47,27 @@ def index():
 
 @app.route("/generate-card", methods=["POST"])
 def generate_card():
-    return "Card Generator Logic Placeholder"
+    try:
+        width = float(request.form["width"])
+        height = float(request.form["height"])
+        language = request.form.get("language", "pl")
+        
+        from cards import create_template
+        pdf_filename = create_template(width, height, language)
+        
+        with open(pdf_filename, 'rb') as f:
+            pdf_bytes = f.read()
+        
+        file_name = f"Card_{width:g}x{height:g}mm_{language}.pdf"
+        
+        return send_file(
+            BytesIO(pdf_bytes),
+            download_name=file_name,
+            mimetype="application/pdf",
+            as_attachment=True
+        )
+    except (KeyError, ValueError) as e:
+        abort(400, f"Niepoprawne dane wejściowe: {str(e)}")
 
 # if __name__ == "__main__":
 #    def open_browser():

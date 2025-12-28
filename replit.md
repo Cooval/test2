@@ -21,11 +21,12 @@ Users can switch between tools using a tabbed interface and select their preferr
 
 ## Routes
 - `GET/POST /` - Main page with BOX Generator form
-- `POST /generate-card` - Card Generator endpoint (placeholder: returns "Card Generator Logic Placeholder")
+- `POST /generate-card` - Card Generator endpoint that generates PDF templates with bleeds and safe areas
 
 ## Key Files
-- `app.py` - Main Flask application with both routes
+- `app.py` - Main Flask application with routes for BOX and CARD generators
 - `generator.py` - SVG generation logic for box patterns
+- `cards.py` - Card template generator with bleeds and safe areas
 - `segments_full.py` - Contains segment definitions for box cutting/folding lines
 - `templates/index.html` - Tabbed interface with both BOX and CARD forms, language switcher, JavaScript for dynamic UI
 - `templates/*.png, *.jpg` - Logo and image assets
@@ -36,6 +37,7 @@ Users can switch between tools using a tabbed interface and select their preferr
 - cairosvg - SVG to PDF conversion
 - pycairo - Cairo graphics library bindings
 - gunicorn - Production WSGI server
+- reportlab - PDF generation for card templates
 
 ## System Dependencies
 - cairo - Required for cairosvg PDF rendering
