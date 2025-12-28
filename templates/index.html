@@ -264,9 +264,9 @@
         </div>
 
         <div class="notes">
-            <span id="note1">• CUT = czerwona linia ciągła</span><br/>
-            <span id="note2">• FOLD = niebieska linia przerywana</span><br/>
-            <span id="note3">• Skala 1 : 1 (mm) – plik gotowy do sztancy / plotera.</span><br/>
+            <span id="note1">• CUT = czerwona linia ciągła</span>
+            <span id="note2">• FOLD = niebieska linia przerywana</span>
+            <span id="note3">• Skala 1 : 1 (mm) – plik gotowy do sztancy / plotera.</span>
             <span id="note4">• Pamiętaj, aby projekt grafiki wychodził conajmniej 3 mm poza linie cięcia (jako spad drukarski).</span>
         </div>
     </div>
@@ -454,7 +454,13 @@ function updateExternal() {
     const xExt = (L + addX).toFixed(1);
     const yExt = (B + addY).toFixed(1);
     const zExt = (H + ep).toFixed(1);
-    document.getElementById('external').textContent = xExt + ' × ' + yExt + ' × ' + zExt;
+    
+    // Convert to inches
+    const xExtInches = mmToInches(xExt);
+    const yExtInches = mmToInches(yExt);
+    const zExtInches = mmToInches(zExt);
+    
+    document.getElementById('external').textContent = xExt + ' × ' + yExt + ' × ' + zExt + ' mm (' + xExtInches + '" × ' + yExtInches + '" × ' + zExtInches + '")';
 }
 
 document.querySelectorAll('input[name=L], input[name=B], input[name=H], select[name=ep1]').forEach(el => {
