@@ -102,6 +102,41 @@
             color: #0d6efd;
             border-color: #0d6efd;
         }
+        .tab-content {
+            margin-top: 30px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .form-grid > div {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-grid label {
+            margin: 0 0 8px 0;
+            font-size: 0.95rem;
+        }
+        .form-grid input,
+        .form-grid select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 480px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -141,7 +176,7 @@
         <form method="post" action="/">
             <input type="hidden" name="language" id="language-input" value="pl">
             
-            <div class="row">
+            <div class="form-grid">
                 <div>
                     <label id="label-height">X mm (wysokość)</label>
                     <input type="number" step="0.1" name="L" value="100" required />
@@ -154,8 +189,6 @@
                     <label id="label-depth">Z mm (głębokość)</label>
                     <input type="number" step="0.1" name="H" value="50" required />
                 </div>
-            </div>
-            <div class="row">
                 <div>
                     <label id="label-flap">Zawinięcie&nbsp;[mm]</label>
                     <input type="number" step="0.1" name="R" value="15" readonly />
@@ -170,7 +203,9 @@
                 </div>
             </div>
 
-            <button id="box-download" type="submit" class="btn btn-primary">POBIERZ PDF</button>
+            <div style="text-align: center;">
+                <button id="box-download" type="submit" class="btn btn-primary">POBIERZ PDF</button>
+            </div>
         </form>
 
         <div class="info-section">
