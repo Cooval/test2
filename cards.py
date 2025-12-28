@@ -48,7 +48,7 @@ def register_polish_font():
     return font_name
 
 def find_logo_file():
-    candidates = ["logo.jpg", "logo.jpeg", "logo.png", "logo.bmp"]
+    candidates = ["templates/MB-print-logo11.png", "logo.jpg", "logo.jpeg", "logo.png", "logo.bmp"]
     for filename in candidates:
         if os.path.exists(filename):
             return filename
