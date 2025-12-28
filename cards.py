@@ -38,6 +38,18 @@ TRANSLATIONS = {
 def register_polish_font():
     font_name = "Helvetica" 
     try:
+        # Try to register DejaVuSans which has better Unicode support
+        dejavu_paths = [
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+            "C:\\Windows\\Fonts\\DejaVuSans.ttf",
+            "/usr/share/fonts/dejavu/DejaVuSans.ttf"
+        ]
+        for path in dejavu_paths:
+            if os.path.exists(path):
+                pdfmetrics.registerFont(TTFont('DejaVuSans', path))
+                return 'DejaVuSans'
+        
+        # Fallback: try Arial
         font_paths = ["C:\\Windows\\Fonts\\arial.ttf", "arial.ttf", "/usr/share/fonts/truetype/arial.ttf"]
         for path in font_paths:
             if os.path.exists(path):
