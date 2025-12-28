@@ -127,6 +127,50 @@
             border-radius: 4px;
             font-size: 1rem;
         }
+        .conversion-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 4px;
+            font-style: italic;
+        }
+        .info-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #0d6efd;
+            margin-top: 25px;
+        }
+        .info-section p {
+            margin: 0 0 10px 0;
+            line-height: 1.6;
+        }
+        .info-section p:last-child {
+            margin-bottom: 0;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #0d6efd;
+        }
+        .info-value {
+            font-size: 1.1rem;
+            color: #333;
+            font-family: 'Courier New', monospace;
+        }
+        .notes {
+            background: #fff3cd;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+            margin-top: 20px;
+            line-height: 1.8;
+        }
+        .notes span {
+            display: block;
+            margin-bottom: 6px;
+        }
+        .notes span:last-child {
+            margin-bottom: 0;
+        }
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -180,18 +224,22 @@
                 <div>
                     <label id="label-height">X mm (wysokość)</label>
                     <input type="number" step="0.1" name="L" value="100" required />
+                    <div class="conversion-text" id="conv-L"></div>
                 </div>
                 <div>
                     <label id="label-width">Y mm (szerokość)</label>
                     <input type="number" step="0.1" name="B" value="100" required />
+                    <div class="conversion-text" id="conv-B"></div>
                 </div>
                 <div>
                     <label id="label-depth">Z mm (głębokość)</label>
                     <input type="number" step="0.1" name="H" value="50" required />
+                    <div class="conversion-text" id="conv-H"></div>
                 </div>
                 <div>
                     <label id="label-flap">Zawinięcie&nbsp;[mm]</label>
                     <input type="number" step="0.1" name="R" value="15" readonly />
+                    <div class="conversion-text" id="conv-R"></div>
                 </div>
                 <div>
                     <label id="label-thick">Grubość tektury&nbsp;[mm]</label>
@@ -200,6 +248,7 @@
                         <option value="1.5">1,5</option>
                         <option value="2" selected>2</option>
                     </select>
+                    <div class="conversion-text" id="conv-ep"></div>
                 </div>
             </div>
 
@@ -209,9 +258,9 @@
         </form>
 
         <div class="info-section">
-            <p id="internal-info" style="font-weight: bold;"></p>
-            <p id="external-label" style="font-weight: bold;"></p>
-            <p id="external"></p>
+            <p id="internal-info"></p>
+            <p><span class="info-label" id="external-label"></span>
+            <span class="info-value" id="external"></span></p>
         </div>
 
         <div class="notes">
@@ -227,19 +276,28 @@
         <form method="post" action="/generate-card">
             <input type="hidden" name="language" id="card-language-input" value="pl">
             
-            <div class="row" style="margin-top: 20px;">
+            <div class="form-grid" style="grid-template-columns: repeat(2, 1fr); gap: 30px;">
                 <div>
                     <label id="label-card-width">Szerokość [mm]</label>
                     <input type="number" step="0.1" name="width" value="63" required />
+                    <div class="conversion-text" id="conv-card-width"></div>
                 </div>
                 <div>
                     <label id="label-card-height">Wysokość [mm]</label>
                     <input type="number" step="0.1" name="height" value="88" required />
+                    <div class="conversion-text" id="conv-card-height"></div>
                 </div>
             </div>
 
-            <button id="card-download" type="submit" class="btn btn-primary">POBIERZ PDF</button>
+            <div style="text-align: center;">
+                <button id="card-download" type="submit" class="btn btn-primary">POBIERZ PDF</button>
+            </div>
         </form>
+        
+        <div class="info-section">
+            <p><span class="info-label" id="card-dimensions-label">Wymiary karty:</span><br>
+            <span class="info-value" id="card-dimensions"></span></p>
+        </div>
     </div>
 </div>
 
@@ -261,6 +319,7 @@ const translations = {
         cardButton: 'POBIERZ PDF',
         internal: 'Wymiary wewnętrzne pudełka (netto)',
         extLabel: 'Wymiary zewnętrzne pudełka [mm]:',
+        cardDimensionsLabel: 'Wymiary karty:',
         note1: '• CUT = czerwona linia cięcia',
         note2: '• FOLD = niebieska linia zagięcia',
         note3: '• Skala 1 : 1 (mm) – plik gotowy do sztancy / plotera.',
@@ -282,6 +341,7 @@ const translations = {
         cardButton: 'DOWNLOAD PDF',
         internal: 'Entered parameters refer to internal box dimensions.',
         extLabel: 'External box dimensions [mm]:',
+        cardDimensionsLabel: 'Card dimensions:',
         note1: '• CUT = red solid line',
         note2: '• FOLD = blue dashed line',
         note3: '• Scale 1 : 1 (mm) – ready for die-cut / plotter.',
@@ -318,6 +378,9 @@ function setLang(lang) {
     // Update info and notes
     document.getElementById('internal-info').textContent = t.internal;
     document.getElementById('external-label').textContent = t.extLabel;
+    if (document.getElementById('card-dimensions-label')) {
+        document.getElementById('card-dimensions-label').textContent = t.cardDimensionsLabel;
+    }
     document.getElementById('note1').textContent = t.note1;
     document.getElementById('note2').textContent = t.note2;
     document.getElementById('note3').textContent = t.note3;
@@ -335,11 +398,49 @@ function setLang(lang) {
     document.querySelector(`[data-lang="${lang}"]`).classList.add('active');
     
     updateExternal();
+    updateBoxConversions();
+    updateCardConversions();
 }
 
 document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.addEventListener('click', () => setLang(btn.dataset.lang));
 });
+
+function mmToInches(mm) {
+    return (mm / 25.4).toFixed(2);
+}
+
+function updateBoxConversions() {
+    const lang = currentLang;
+    const suffix = lang === 'pl' ? ' cali' : ' in';
+    
+    const L = parseFloat(document.querySelector('input[name=L]').value) || 0;
+    const B = parseFloat(document.querySelector('input[name=B]').value) || 0;
+    const H = parseFloat(document.querySelector('input[name=H]').value) || 0;
+    const R = parseFloat(document.querySelector('input[name=R]').value) || 0;
+    const ep = parseFloat(document.querySelector('select[name=ep1]').value) || 0;
+    
+    document.getElementById('conv-L').textContent = `${mmToInches(L)}${suffix}`;
+    document.getElementById('conv-B').textContent = `${mmToInches(B)}${suffix}`;
+    document.getElementById('conv-H').textContent = `${mmToInches(H)}${suffix}`;
+    document.getElementById('conv-R').textContent = `${mmToInches(R)}${suffix}`;
+    document.getElementById('conv-ep').textContent = `${mmToInches(ep)}${suffix}`;
+}
+
+function updateCardConversions() {
+    const lang = currentLang;
+    const suffix = lang === 'pl' ? ' cali' : ' in';
+    
+    const width = parseFloat(document.querySelector('input[name=width]').value) || 0;
+    const height = parseFloat(document.querySelector('input[name=height]').value) || 0;
+    
+    document.getElementById('conv-card-width').textContent = `${mmToInches(width)}${suffix}`;
+    document.getElementById('conv-card-height').textContent = `${mmToInches(height)}${suffix}`;
+    
+    const widthInches = mmToInches(width);
+    const heightInches = mmToInches(height);
+    document.getElementById('card-dimensions').textContent = `${width} × ${height} mm (${widthInches}" × ${heightInches}")`;
+}
 
 function updateExternal() {
     const L = parseFloat(document.querySelector('input[name=L]').value) || 0;
@@ -357,11 +458,24 @@ function updateExternal() {
 }
 
 document.querySelectorAll('input[name=L], input[name=B], input[name=H], select[name=ep1]').forEach(el => {
-    el.addEventListener('input', updateExternal);
-    el.addEventListener('change', updateExternal);
+    el.addEventListener('input', () => {
+        updateExternal();
+        updateBoxConversions();
+    });
+    el.addEventListener('change', () => {
+        updateExternal();
+        updateBoxConversions();
+    });
+});
+
+document.querySelectorAll('input[name=width], input[name=height]').forEach(el => {
+    el.addEventListener('input', updateCardConversions);
+    el.addEventListener('change', updateCardConversions);
 });
 
 updateExternal();
+updateBoxConversions();
+updateCardConversions();
 
 // Initialize to page language
 setLang(document.documentElement.lang || 'pl');
