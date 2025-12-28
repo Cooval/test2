@@ -3,3 +3,8 @@ svgwrite>=1.4
 cairosvg>=2.7
 pycairo>=1.26
 gunicorn>=21.2.0
+cairosvg
+flask
+gunicorn
+pycairo
+svgwrite
