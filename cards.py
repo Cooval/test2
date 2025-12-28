@@ -161,11 +161,20 @@ def create_template(width_mm, height_mm, lang):
     base_desc_size = 7
     base_header_size = 8
     base_data_size = 8
-    if width_mm < 60:
-        scale = width_mm / 60.0
-        base_desc_size = max(4.5, base_desc_size * scale)
-        base_header_size = max(5, base_header_size * scale)
-        base_data_size = max(5, base_data_size * scale)
+    
+    # Scaling based on card dimensions (both width and height)
+    min_dim = min(width_mm, height_mm)
+    if min_dim < 100:
+        scale = min_dim / 100.0
+        # More aggressive scaling for very small cards
+        if min_dim < 60:
+            base_desc_size = max(3.5, base_desc_size * scale * 0.8)
+            base_header_size = max(4, base_header_size * scale * 0.8)
+            base_data_size = max(4, base_data_size * scale * 0.8)
+        else:
+            base_desc_size = max(4.5, base_desc_size * scale)
+            base_header_size = max(5, base_header_size * scale)
+            base_data_size = max(5, base_data_size * scale)
 
     styles = getSampleStyleSheet()
     style_desc = ParagraphStyle('Desc', parent=styles['Normal'], fontName=font_name, 
