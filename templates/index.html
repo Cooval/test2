@@ -2,88 +2,230 @@
 <html lang="pl">
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Generator siatki pudełka</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body{font-family:sans-serif; max-width:580px; margin:40px auto; text-align:center;}
-        label{display:block;margin:8px 0 2px;text-align:left}
-        input[type=number], select{width:120px}
-        input[readonly]{background:#eee}
-        .row{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
-        button{margin-top:16px;padding:8px 18px;font-size:1rem}
-        .lang-switch{margin-bottom:20px;}
-        .lang-switch button{margin:0 4px;padding:4px 10px;font-size:0.9rem}
-        .box-diagram{position:relative;display:inline-block;margin:20px 0;}
-        .logo{width:150px;margin-bottom:20px;}
+        body {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .logo {
+            width: 150px;
+            margin-bottom: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .lang-switch {
+            display: flex;
+            gap: 8px;
+        }
+        .lang-switch button {
+            padding: 4px 10px;
+            font-size: 0.9rem;
+            border: 1px solid #ccc;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .lang-switch button.active {
+            background: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+        }
+        .title-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .title-section h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .box-diagram {
+            position: relative;
+            display: inline-block;
+            margin: 20px auto;
+            width: 100%;
+            text-align: center;
+        }
+        .box-diagram img {
+            max-width: 100%;
+            height: auto;
+        }
+        label {
+            display: block;
+            margin: 8px 0 2px;
+            text-align: left;
+        }
+        input[type=number], select {
+            width: 120px;
+        }
+        input[readonly] {
+            background: #eee;
+        }
+        .row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        button[type=submit] {
+            margin-top: 16px;
+            padding: 8px 18px;
+            font-size: 1rem;
+        }
+        .info-section {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .info-section p {
+            margin-bottom: 8px;
+        }
+        .notes {
+            margin-top: 32px;
+            font-size: 0.9em;
+            color: #444;
+        }
+        .nav-tabs .nav-link {
+            color: #333;
+        }
+        .nav-tabs .nav-link.active {
+            color: #0d6efd;
+            border-color: #0d6efd;
+        }
     </style>
 </head>
 <body>
-<img class="logo" src="{{ url_for('static', filename='MB-print-logo11.png') }}" alt="MB print logo"/>
-<div class="lang-switch">
-    <button type="button" data-lang="pl">PL</button>
-    <button type="button" data-lang="en">EN</button>
-</div>
-<h2 id="title">Projekt pudełka (spód/wieko + oklejka)</h2>
-
-<div class="box-diagram">
-    <img id="box-image" src="{{ url_for('static', filename='pud_pl.jpg') }}" alt="Box dimensions"/>
+<div class="top-bar">
+    <img class="logo" src="{{ url_for('static', filename='MB-print-logo11.png') }}" alt="MB print logo"/>
+    <div class="lang-switch">
+        <button type="button" data-lang="pl" class="lang-btn active">PL</button>
+        <button type="button" data-lang="en" class="lang-btn">EN</button>
+    </div>
 </div>
 
-<form method="post">
-    <div class="row">
-        <div>
-            <label id="label-height">X mm (wysokość)</label>
-            <input type="number" step="0.1" name="L"   value="100" required />
+<div class="title-section">
+    <h2 id="main-title">Projekt pudełka (spód/wieko + oklejka)</h2>
+</div>
+
+<!-- Bootstrap Tabs -->
+<ul class="nav nav-tabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="box-tab" data-bs-toggle="tab" data-bs-target="#box-content" type="button" role="tab" aria-controls="box-content" aria-selected="true">
+            <span id="tab-box-label">BOX (Oklejka)</span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="card-tab" data-bs-toggle="tab" data-bs-target="#card-content" type="button" role="tab" aria-controls="card-content" aria-selected="false">
+            <span id="tab-card-label">CARD (Karty)</span>
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <!-- BOX Tab -->
+    <div class="tab-pane fade show active" id="box-content" role="tabpanel" aria-labelledby="box-tab">
+        <div class="box-diagram">
+            <img id="box-image" src="{{ url_for('static', filename='pud_pl.jpg') }}" alt="Box dimensions"/>
         </div>
-        <div>
-            <label id="label-width">Y mm (szerokość)</label>
-            <input type="number" step="0.1" name="B"   value="100" required />
+
+        <form method="post" action="/">
+            <input type="hidden" name="language" id="language-input" value="pl">
+            
+            <div class="row">
+                <div>
+                    <label id="label-height">X mm (wysokość)</label>
+                    <input type="number" step="0.1" name="L" value="100" required />
+                </div>
+                <div>
+                    <label id="label-width">Y mm (szerokość)</label>
+                    <input type="number" step="0.1" name="B" value="100" required />
+                </div>
+                <div>
+                    <label id="label-depth">Z mm (głębokość)</label>
+                    <input type="number" step="0.1" name="H" value="50" required />
+                </div>
+            </div>
+            <div class="row">
+                <div>
+                    <label id="label-flap">Zawinięcie&nbsp;[mm]</label>
+                    <input type="number" step="0.1" name="R" value="15" readonly />
+                </div>
+                <div>
+                    <label id="label-thick">Grubość tektury&nbsp;[mm]</label>
+                    <select name="ep1" required>
+                        <option value="1">1</option>
+                        <option value="1.5">1,5</option>
+                        <option value="2" selected>2</option>
+                    </select>
+                </div>
+            </div>
+
+            <button id="box-download" type="submit" class="btn btn-primary">POBIERZ PDF</button>
+        </form>
+
+        <div class="info-section">
+            <p id="internal-info" style="font-weight: bold;"></p>
+            <p id="external-label" style="font-weight: bold;"></p>
+            <p id="external"></p>
         </div>
-        <div>
-            <label id="label-depth">Z mm (głębokość)</label>
-            <input type="number" step="0.1" name="H"   value="50"  required />
+
+        <div class="notes">
+            <span id="note1">• CUT = czerwona linia ciągła</span><br/>
+            <span id="note2">• FOLD = niebieska linia przerywana</span><br/>
+            <span id="note3">• Skala 1 : 1 (mm) – plik gotowy do sztancy / plotera.</span><br/>
+            <span id="note4">• Pamiętaj, aby projekt grafiki wychodził conajmniej 3 mm poza linie cięcia (jako spad drukarski).</span>
         </div>
     </div>
-    <div class="row">
-        <div>
-            <label id="label-flap">Zawinięcie&nbsp;[mm]</label>
-            <input type="number" step="0.1" name="R"   value="15" readonly />
-        </div>
-        <div>
-            <label id="label-thick">Grubość tektury&nbsp;[mm]</label>
-            <select name="ep1" required>
-                <option value="1">1</option>
-                <option value="1.5">1,5</option>
-                <option value="2" selected>2</option>
-            </select>
-        </div>
+
+    <!-- CARD Tab -->
+    <div class="tab-pane fade" id="card-content" role="tabpanel" aria-labelledby="card-tab">
+        <form method="post" action="/generate-card">
+            <input type="hidden" name="language" id="card-language-input" value="pl">
+            
+            <div class="row" style="margin-top: 20px;">
+                <div>
+                    <label id="label-card-width">Szerokość [mm]</label>
+                    <input type="number" step="0.1" name="width" value="100" required />
+                </div>
+                <div>
+                    <label id="label-card-height">Wysokość [mm]</label>
+                    <input type="number" step="0.1" name="height" value="50" required />
+                </div>
+            </div>
+
+            <button id="card-download" type="submit" class="btn btn-primary">POBIERZ PDF</button>
+        </form>
     </div>
+</div>
 
-    <button id="download" type="submit">POBIERZ PDF</button>
-</form>
-
-<p id="internal-info" style="margin-top:20px;font-weight:bold"></p>
-<p id="external-label" style="font-weight:bold"></p>
-<p id="external" style="margin-bottom:20px"></p>
-
-<p style="margin-top:32px;font-size:0.9em;color:#444">
-    <span id="note1">• CUT = czerwona linia ciągła</span><br/>
-    <span id="note2">• FOLD = niebieska linia przerywana</span><br/>
-    <span id="note3">• Skala 1 : 1 (mm) – plik gotowy do sztancy / plotera.</span><br/>
-    <span id="note4">• Pamiętaj, aby projekt grafiki wychodził conajmniej 3 mm poza linie cięcia (jako spad drukarski).</span>
-</p>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 const translations = {
     pl: {
-        title: 'Projekt pudełka (spód/wieko + oklejka)',
+        mainTitle: 'Projekt pudełka (spód/wieko + oklejka)',
+        tabBox: 'BOX (Oklejka)',
+        tabCard: 'CARD (Karty)',
         height: 'X mm (wysokość)',
         width: 'Y mm (szerokość)',
         depth: 'Z mm (głębokość)',
         flap: 'Zawinięcie [mm]',
         thick: 'Grubość tektury [mm]',
-        button: 'POBIERZ PDF',
+        boxButton: 'POBIERZ PDF',
+        cardWidth: 'Szerokość [mm]',
+        cardHeight: 'Wysokość [mm]',
+        cardButton: 'POBIERZ PDF',
         internal: 'Wprowadzane parametry to wymiary wewnętrzne pudełka.',
-        extLabel: 'Wymiary zewnętrzne pudełka [mm]:' ,
+        extLabel: 'Wymiary zewnętrzne pudełka [mm]:',
         note1: '• CUT = czerwona linia cięcia',
         note2: '• FOLD = niebieska linia zagięcia',
         note3: '• Skala 1 : 1 (mm) – plik gotowy do sztancy / plotera.',
@@ -91,33 +233,54 @@ const translations = {
         image: "{{ url_for('static', filename='pud_pl.jpg') }}"
     },
     en: {
-        title: 'Box design (bottom/top + wrapper)',
+        mainTitle: 'Box design (bottom/top + wrapper)',
+        tabBox: 'BOX (Wrapper)',
+        tabCard: 'CARD (Cards)',
         height: 'X mm (height)',
         width: 'Y mm (width)',
         depth: 'Z mm (depth)',
         flap: 'Flap [mm]',
         thick: 'Cardboard thickness [mm]',
-        button: 'DOWNLOAD PDF',
+        boxButton: 'DOWNLOAD PDF',
+        cardWidth: 'Width [mm]',
+        cardHeight: 'Height [mm]',
+        cardButton: 'DOWNLOAD PDF',
         internal: 'Entered parameters refer to internal box dimensions.',
-        extLabel: 'External box dimensions [mm]:' ,
+        extLabel: 'External box dimensions [mm]:',
         note1: '• CUT = red solid line',
         note2: '• FOLD = blue dashed line',
         note3: '• Scale 1 : 1 (mm) – ready for die-cut / plotter.',
-        note4: '• Remember that the graphic design should extend at least 3 mm beyond the cutting lines (as a printing bleed))',
+        note4: '• Remember that the graphic design should extend at least 3 mm beyond the cutting lines (as a printing bleed)',
         image: "{{ url_for('static', filename='pud_en.jpg') }}"
     }
 };
 
+let currentLang = 'pl';
+
 function setLang(lang) {
+    currentLang = lang;
     const t = translations[lang];
     document.documentElement.lang = lang;
-    document.getElementById('title').textContent = t.title;
+    
+    // Update main title and tabs
+    document.getElementById('main-title').textContent = t.mainTitle;
+    document.getElementById('tab-box-label').textContent = t.tabBox;
+    document.getElementById('tab-card-label').textContent = t.tabCard;
+    
+    // Update BOX form labels
     document.getElementById('label-height').textContent = t.height;
     document.getElementById('label-width').textContent = t.width;
     document.getElementById('label-depth').textContent = t.depth;
     document.getElementById('label-flap').textContent = t.flap;
     document.getElementById('label-thick').textContent = t.thick;
-    document.getElementById('download').textContent = t.button;
+    document.getElementById('box-download').textContent = t.boxButton;
+    
+    // Update CARD form labels
+    document.getElementById('label-card-width').textContent = t.cardWidth;
+    document.getElementById('label-card-height').textContent = t.cardHeight;
+    document.getElementById('card-download').textContent = t.cardButton;
+    
+    // Update info and notes
     document.getElementById('internal-info').textContent = t.internal;
     document.getElementById('external-label').textContent = t.extLabel;
     document.getElementById('note1').textContent = t.note1;
@@ -125,10 +288,21 @@ function setLang(lang) {
     document.getElementById('note3').textContent = t.note3;
     document.getElementById('note4').textContent = t.note4;
     document.getElementById('box-image').src = t.image;
+    
+    // Update language inputs
+    document.getElementById('language-input').value = lang;
+    document.getElementById('card-language-input').value = lang;
+    
+    // Update active button
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`[data-lang="${lang}"]`).classList.add('active');
+    
     updateExternal();
 }
 
-document.querySelectorAll('.lang-switch button').forEach(btn => {
+document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.addEventListener('click', () => setLang(btn.dataset.lang));
 });
 
@@ -154,7 +328,7 @@ document.querySelectorAll('input[name=L], input[name=B], input[name=H], select[n
 
 updateExternal();
 
-// initialize to page language
+// Initialize to page language
 setLang(document.documentElement.lang || 'pl');
 </script>
 </body>

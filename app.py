@@ -45,6 +45,10 @@ def index():
 
     return render_template("index.html")
 
+@app.route("/generate-card", methods=["POST"])
+def generate_card():
+    return "Card Generator Logic Placeholder"
+
 # if __name__ == "__main__":
 #    def open_browser():
 #        time.sleep(1)
