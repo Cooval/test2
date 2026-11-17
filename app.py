@@ -19,6 +19,7 @@ def index():
             H   = float(request.form["H"])      # H = H2
             R   = float(request.form["R"])
             ep1 = float(request.form["ep1"])    # = th1
+            language = request.form.get("language", "pl")
 
             ext_dims = external_dims(L, B, H, ep1)
             logo = app.static_folder + "/MB-print-logo11.png"
@@ -30,10 +31,12 @@ def index():
                 ep1,
                 logo_path=logo,
                 ext_dims=ext_dims,
+                lang=language,
             )
             pdf_bytes = cairosvg.svg2pdf(bytestring=svg_bytes)
 
-            file_name = f"Box_{L:g}x{B:g}x{H:g}_{ep1:g}mm.pdf"
+            board_suffix = f"board_{ep1:g}mm" if language.lower() == "en" else f"tektura_{ep1:g}mm"
+            file_name = f"Box_{L:g}x{B:g}x{H:g}_{board_suffix}.pdf"
 
             return send_file(BytesIO(pdf_bytes),
                               download_name=file_name,

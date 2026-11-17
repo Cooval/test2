@@ -92,6 +92,7 @@ def svg_bytes_from_params(
     *,
     logo_path: str | None = None,
     ext_dims: tuple | None = None,
+    lang: str = "pl",
 ):
     """Return SVG drawing bytes of the box layout with margins and labels."""
     v = _derived_vars(L, B, H, R, ep)
@@ -131,23 +132,27 @@ def svg_bytes_from_params(
 #   //             )
 #   //         )
 
-# Informational text on top margin split into five lines
+# Informational text on top margin split into seven lines
     if ext_dims is not None:
-        # Definicja 5 linii tekstu zgodnie z instrukcją
+        lang_lower = (lang or "pl").lower()
+        if lang_lower == "en":
+            board_label = "Board Thickness:"
+        else:
+            board_label = "Grubość tektury:"
+
         texts = [
-            "Inner Size:",                                     # Nowy napis
-            f"{L:g}×{B:g}×{H:g} mm",                                 # Dawna linia 1
-            "Outer Size:",                                     # Nowy napis
-            f"{ext_dims[0]:g}×{ext_dims[1]:g}×{ext_dims[2]:g} mm",   # Dawna linia 2
-            "www.mbprint.pl"                                         # Dawna linia 3
+            "Inner Size:",
+            f"{L:g}×{B:g}×{H:g} mm",
+            "Outer Size:",
+            f"{ext_dims[0]:g}×{ext_dims[1]:g}×{ext_dims[2]:g} mm",
+            board_label,
+            f"{ep:g} mm",
+            "www.mbprint.pl",
         ]
 
-        base_y = margin / 3
-        
-        # Przeskalowanie, aby 5 linii zmieściło się w miejscu 3
-        # Oryginalnie: gap 11mm, font 10mm. Mnożymy przez 0.6 (3/5)
-        line_gap = 6.6  
-        current_font_size = 6 
+        base_y = max(5, margin / 3 - 2)
+        line_gap = 4.5
+        current_font_size = 4.5
 
         for i, txt in enumerate(texts):
             dwg.add(
